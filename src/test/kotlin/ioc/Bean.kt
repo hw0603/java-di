@@ -49,7 +49,7 @@ class Bean : FreeSpec({
         하지만 스프링은 표준 자바를 지원하므로 추가적인 인터페이스를 구현할 필요가 없습니다.
         @see AppConfig#sampleObject()
         """ {
-            applicationContext.isBeanNameInUse("sampleObject") shouldBe false
+            applicationContext.isBeanNameInUse("sampleObject") shouldBe true
         }
 
         """
@@ -60,22 +60,22 @@ class Bean : FreeSpec({
         XML 파일로 구성 메타데이터를 작성한다면 factory-method 속성을 사용하여 팩터리 메서드를 지정할 수 있습니다.
         @see AppConfig#sampleFactoryObject()
         """ {
-            applicationContext.isBeanNameInUse("sampleFactoryObject") shouldBe false
+            applicationContext.isBeanNameInUse("sampleFactoryObject") shouldBe true
         }
     }
 
     """
     Bean 이름 지정하기
-    모든 Bean은 하나 이상의 이름(name)과 하나의 식별자(id)가 있다. 식별자는 컨테이너 내에서 고유해야 합니다.
+    모든 Bean은 하나 이상의 이름(name)과 하나의 식별자(id)가 있습니다. 식별자는 컨테이너 내에서 고유해야 합니다.
     Bean 이름이나 id를 생략하면 컨테이너는 자동으로 Bean의 고유한 이름을 생성합니다.
     
-    Bean 이름 규칙은 표준 Java 규칙을 사용한다. Bean 이름은 CamelCase로 작성합니다.
+    Bean 이름 규칙은 표준 Java 규칙을 사용합니다. Bean 이름은 camelCase로 작성합니다.
     예시) accountManager, accountService, userDao, loginController
     
     일관된 Bean 이름은 구성(Configuration)을 더 쉽게 읽고 이해할 수 있습니다.
     또한 Spring AOP를 사용할 때 이름으로 Advice를 적용할 때 많은 도움이 됩니다.
     """ {
-        applicationContext.isBeanNameInUse("sampleObject") shouldBe false
+        applicationContext.isBeanNameInUse("sampleObject") shouldBe true
     }
 
     """
@@ -87,7 +87,7 @@ class Bean : FreeSpec({
     Java 구성은 @Bean 어노테이션의 name 속성을 사용하여 Bean 별칭을 지정할 수 있습니다.
     @see AppConfig#sampleAlias()
     """ {
-        applicationContext.isBeanNameInUse("firstName") shouldBe false
-        applicationContext.isBeanNameInUse("secondName") shouldBe false
+        applicationContext.isBeanNameInUse("firstName") shouldBe true
+        applicationContext.isBeanNameInUse("secondName") shouldBe true
     }
 })
