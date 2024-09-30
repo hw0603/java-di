@@ -13,7 +13,7 @@ public class PreDestroySampleObject {
 
   @PreDestroy
   public void close() {
-    this.message = "PostConstructSampleObject.close() method called";
+    this.message = "PreDestorySampleObject.close() method called";
   }
 
   public String getMessage() {
