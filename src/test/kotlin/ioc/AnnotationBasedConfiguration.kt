@@ -1,11 +1,13 @@
 package ioc
 
-import annotation.*
+import annotation.AnnotationConfig
+import annotation.PrimaryConfig
+import annotation.PropertyConfig
+import annotation.QualifierConfig
 import annotation.sample.*
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -44,7 +46,7 @@ class AnnotationBasedConfiguration : FreeSpec({
             val movieRecommender = applicationContext.getBean(MovieRecommender::class.java)
             val customerPreferenceDao = movieRecommender.customerPreferenceDao
 
-            customerPreferenceDao.shouldBeNull()
+            customerPreferenceDao.shouldBeTypeOf<CustomerPreferenceDao>()
         }
 
         """
@@ -55,7 +57,7 @@ class AnnotationBasedConfiguration : FreeSpec({
             val movieRecommender = applicationContext.getBean(MovieRecommender::class.java)
             val movieCatalogs = movieRecommender.movieCatalogs
 
-            movieCatalogs.shouldContainKey("")
+            movieCatalogs.shouldContainKey("movieCatalog")
         }
 
         """
@@ -72,7 +74,7 @@ class AnnotationBasedConfiguration : FreeSpec({
             val kakaotalkMessageSender = messageService.getMessageSender("kakaotalkMessageSender")
 
             // 생성자에 인터페이스만 명시했는데, 스프링이 자동으로 Bean 구현체를 찾아서 주입했습니다.
-            kakaotalkMessageSender.shouldBeTypeOf<Object>()
+            kakaotalkMessageSender.shouldBeTypeOf<KakaotalkMessageSender>()
         }
 
         """
@@ -89,7 +91,7 @@ class AnnotationBasedConfiguration : FreeSpec({
             // 하지만 setNoImplements() 메서드에 @Autowired(required = false)를 설정했기 때문에 예외가 발생하지 않습니다.
             val noImplements = simpleMovieLister.noImplements
 
-            noImplements.shouldNotBeNull()
+            noImplements.shouldBeNull()
         }
     }
 
@@ -101,18 +103,26 @@ class AnnotationBasedConfiguration : FreeSpec({
     후보 중 정확히 하나의 기본 Bean이 존재하면 해당 Bean이 자동 연결 됩니다.
     """ {
         /**
-         * MovieConfig 클래스에서 MovieCatalog 타입의 Bean을 두 개로 등록했습니다.
-         * 그리고 MovieConfig 클래스에서 MovieCatalog를 주입 받습니다.
+         * PrimaryConfig 클래스에서 MovieCatalog 타입의 Bean을 두 개로 등록했습니다.
+         * 그리고 PrimaryConfig 클래스에서 MovieCatalog를 주입 받습니다.
          * 하지만 MovieCatalog 타입의 Bean이 두 개이기 때문에 어떤 Bean을 주입해야 할지 모호합니다.
          * 이때 @Primary를 사용하여 우선순위를 부여하면 해당 Bean이 주입됩니다.
          * @Primary를 사용하지 않으면 예외가 발생합니다.
          * MovieConfig 클래스에서 @Primary를 주석 처리하고 테스트를 실행해보세요.
          */
+
+        /*
+        @Primary를 주석 처리하면 다음과 같은 예외가 발생합니다.
+        Error creating bean with name 'primaryConfig':
+            Unsatisfied dependency expressed through method 'setMovieCatalog' parameter 0:
+                No qualifying bean of type 'annotation.sample.MovieCatalog' available:
+                    expected single matching bean but found 2: firstMovieCatalog,secondMovieCatalog
+         */
         val applicationContext = AnnotationConfigApplicationContext(PrimaryConfig::class.java)
         val primaryConfig = applicationContext.getBean(PrimaryConfig::class.java)
         val movieCatalog = primaryConfig.movieCatalog
 
-        movieCatalog.shouldBeTypeOf<Object>()
+        movieCatalog.shouldBeTypeOf<MovieCatalog>()
     }
 
     """
@@ -128,11 +138,19 @@ class AnnotationBasedConfiguration : FreeSpec({
     """ {
         // QualifierConfig 클래스에서 setter 주입에 @Qualifier를 사용하여 Bean의 이름을 지정합니다.
         // @Qualifier를 제거하면 예외가 발생하는지 테스트로 확인해보세요.
+
+        /*
+        @Qualifier를 제거하면 다음과 같은 예외가 발생합니다.
+        Error creating bean with name 'qualifierConfig':
+            Unsatisfied dependency expressed through method 'setMovieCatalog' parameter 0:
+                No qualifying bean of type 'annotation.sample.MovieCatalog' available:
+                    expected single matching bean but found 2: firstMovieCatalog,secondMovieCatalog
+         */
         val applicationContext = AnnotationConfigApplicationContext(QualifierConfig::class.java)
         val qualifierConfig = applicationContext.getBean(QualifierConfig::class.java)
         val movieCatalog = qualifierConfig.movieCatalog
 
-        movieCatalog.shouldBeTypeOf<Object>()
+        movieCatalog.shouldBeTypeOf<MovieCatalog>()
     }
 
     """
@@ -146,6 +164,6 @@ class AnnotationBasedConfiguration : FreeSpec({
 
         // defaultValue는 외부 프로퍼티에 정의되어 있지 않습니다.
         // @Value("${value.default:기본값}")에서 설정한 문자열 "기본값"이 주입됩니다.
-        sampleValue.defaultValue shouldBe ""
+        sampleValue.defaultValue shouldBe "기본값"
     }
 })
