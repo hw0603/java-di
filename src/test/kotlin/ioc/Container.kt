@@ -35,13 +35,14 @@ class Container : FreeSpec({
         XML 파일에 빈 설정을 기술합니다.
         study/src/test/resources/ioc/applicationContext.xml 파일을 참고하세요.
         """ {
+            /*     <bean id="sampleObject" class="ioc.SampleObject" />     */
             val applicationContext = GenericXmlApplicationContext("classpath:ioc/applicationContext.xml")
 
             // ApplicationContext에서 SampleObject Bean 객체를 조회합니다.
             val sampleObject = applicationContext.getBean("sampleObject", SampleObject::class.java)
 
             // 조회한 Bean 객체가 SampleObject 타입인지 확인합니다.
-            sampleObject.shouldBeTypeOf<Object>()
+            sampleObject.shouldBeTypeOf<SampleObject>()
         }
 
         """
@@ -51,13 +52,19 @@ class Container : FreeSpec({
         개발자가 원한다면 커스텀한 방법으로 구성 메타데이터를 작성할 수 있습니다.
         스프링은 특정 기술에 종속되지 않도록 설계되었습니다.
         """ {
+            /*
+            import ioc.SampleObject
+            beans {
+                sampleObject(SampleObject)
+            }
+             */
             val applicationContext = GenericGroovyApplicationContext("classpath:ioc/applicationContext.groovy")
 
             // ApplicationContext에서 SampleObject Bean 객체를 조회합니다.
             val sampleObject = applicationContext.getBean("sampleObject", SampleObject::class.java)
 
             // 조회한 Bean 객체가 SampleObject 타입인지 확인합니다.
-            sampleObject.shouldBeTypeOf<Object>()
+            sampleObject.shouldBeTypeOf<SampleObject>()
         }
     }
 })
